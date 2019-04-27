@@ -75,9 +75,20 @@ def handle_dialog(res, req):
     # и если он отвечает на вопрос хочет ли он играть
     elif sessionStorage[user_id]['dialog'] is "continue":
         if "да" in req['request']['nlu']['tokens']:
+            sessionStorage[user_id]['dialog'] is "play"
             res['response']['text'] = 'понятно'
         elif "нет" in req['request']['nlu']['tokens']:
-            req['response']['response']['end_session'] = True
+            res['response']['text'] = 'пока'
+            res['response']['end_session'] = True
+        else:
+            res['response']['text'] = 'Я не поняла ответа. Так да ли нет?'
+
+    elif sessionStorage[user_id]['dialog'] is "play":
+        if "да" in req['request']['nlu']['tokens']:
+            res['response']['text'] = 'понятно'
+        elif "нет" in req['request']['nlu']['tokens']:
+            res['response']['text'] = 'пока'
+            res['response']['end_session'] = True
         else:
             res['response']['text'] = 'Я не поняла ответа. Так да ли нет?'
 

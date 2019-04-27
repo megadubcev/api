@@ -3,7 +3,7 @@ import logging
 import json
 import random
 
-from math2 import sum
+from math2 import vibor
 
 app = Flask(__name__)
 
@@ -79,7 +79,7 @@ def handle_dialog(res, req):
     elif sessionStorage[user_id]['dialog'] is "continue":
         if "да" in req['request']['nlu']['tokens']:
             sessionStorage[user_id]['dialog'] = "play"
-            sessionStorage[user_id]['question'] = sum()
+            sessionStorage[user_id]['question'] = vibor()
             res['response']['text'] = 'Сколько будет ' + sessionStorage[user_id]['question'][0]
 
         elif "нет" in req['request']['nlu']['tokens']:

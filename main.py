@@ -3,6 +3,8 @@ import logging
 import json
 import random
 
+from math2 import sum
+
 app = Flask(__name__)
 
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +39,8 @@ def handle_dialog(res, req):
             'first_name': None,
             'reiting': None,
             'number': 0,
-            'dialog': "continue"
+            'dialog': "continue",
+            'question': None
         }
 
         return
@@ -76,7 +79,9 @@ def handle_dialog(res, req):
     elif sessionStorage[user_id]['dialog'] is "continue":
         if "да" in req['request']['nlu']['tokens']:
             sessionStorage[user_id]['dialog'] = "play"
-            res['response']['text'] = 'понятно'
+            sessionStorage[user_id]['question'] = sum()
+            res['response']['text'] = 'Сколько будет ' + sessionStorage[user_id]['question'][0]
+
         elif "нет" in req['request']['nlu']['tokens']:
             res['response']['text'] = 'пока'
             res['response']['end_session'] = True
@@ -86,8 +91,13 @@ def handle_dialog(res, req):
     elif sessionStorage[user_id]['dialog'] is "play":
         if get_number(req) == None:
             res['response']['text'] = 'Повтори я не расслышала'
+
+        elif int(get_number(req)) == sessionStorage[user_id]['question'][1]:
+            res['response']['text'] = "Абсолютно верно! Хочешь сыграть еще?"
+            sessionStorage[user_id]['dialog'] = "continue"
         else:
-            res['response']['text'] = get_number(req)
+            res['response']['text'] = "Неверно! Правильный ответ: " + str(sessionStorage[user_id]['question'][1]) + ". Хочешь сыграть еще?"
+            sessionStorage[user_id]['dialog'] = "continue"
 
 
 def get_first_name(req):

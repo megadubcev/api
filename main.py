@@ -35,7 +35,7 @@ def handle_dialog(res, req):
     if req['session']['new']:
         res['response']['text'] = 'Привет! Назови свое имя!'
         # созда\м словарь в который в будущем положим имя пользователя
-        sessionStorage[user_id] = {
+        sessionStorage[session_id] = {
             'first_name': None,
             'reiting': [0, 0],
             'dialog': "continue",

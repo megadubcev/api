@@ -36,7 +36,7 @@ def handle_dialog(res, req):
         sessionStorage[user_id] = {
             'first_name': None,
             'reiting': None,
-            'number': None,
+            'number': 0,
             'dialog': "continue"
         }
 
@@ -75,7 +75,7 @@ def handle_dialog(res, req):
     # и если он отвечает на вопрос хочет ли он играть
     elif sessionStorage[user_id]['dialog'] is "continue":
         if "да" in req['request']['nlu']['tokens']:
-            sessionStorage[user_id]['dialog'] is "play"
+            sessionStorage[user_id]['dialog'] = "play"
             res['response']['text'] = 'понятно'
         elif "нет" in req['request']['nlu']['tokens']:
             res['response']['text'] = 'пока'
@@ -84,13 +84,10 @@ def handle_dialog(res, req):
             res['response']['text'] = 'Я не поняла ответа. Так да ли нет?'
 
     elif sessionStorage[user_id]['dialog'] is "play":
-        if "да" in req['request']['nlu']['tokens']:
-            res['response']['text'] = 'понятно'
-        elif "нет" in req['request']['nlu']['tokens']:
-            res['response']['text'] = 'пока'
-            res['response']['end_session'] = True
+        if get_number(req) == None:
+            res['response']['text'] = 'Повтори я не расслышала'
         else:
-            res['response']['text'] = 'Я не поняла ответа. Так да ли нет?'
+            res['response']['text'] = get_number(req)
 
 
 def get_first_name(req):
@@ -102,6 +99,13 @@ def get_first_name(req):
             # то возвращаем ее значение.
             # Во всех остальных случаях возвращаем None.
             return entity['value'].get('first_name', None)
+
+def get_number(req):
+    for token in req['request']['nlu']['tokens']:
+
+        if token.isdigit():
+           return token
+    return None
 
 
 if __name__ == '__main__':

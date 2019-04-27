@@ -14,7 +14,7 @@ def raznost():
 
 def multiply():
     a = random.randint(1, 12)
-    b = random.randint(1, 100)
+    b = random.randint(1, 12)
     c = a * b
     return [str(a) + " * " + str(b), c]
 

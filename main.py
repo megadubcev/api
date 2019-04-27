@@ -37,8 +37,7 @@ def handle_dialog(res, req):
         # созда\м словарь в который в будущем положим имя пользователя
         sessionStorage[user_id] = {
             'first_name': None,
-            'reiting': None,
-            'number': 0,
+            'reiting': [0, 0],
             'dialog': "continue",
             'question': None
         }
@@ -93,10 +92,19 @@ def handle_dialog(res, req):
             res['response']['text'] = 'Повтори я не расслышала'
 
         elif int(get_number(req)) == sessionStorage[user_id]['question'][1]:
-            res['response']['text'] = "Абсолютно верно! Хочешь сыграть еще?"
+            sessionStorage[user_id]['reiting'] = [sessionStorage[user_id]['reiting'][0] + 1,
+                                                  sessionStorage[user_id]['reiting'][1] + 1]
+            res['response']['text'] = "Абсолютно верно! Твой рейтинг: " + str(sessionStorage[user_id]['reiting'][
+                                                                                  0]) + " из " + str(
+                sessionStorage[user_id]['reiting'][1]) + ". Хочешь сыграть еще?"
             sessionStorage[user_id]['dialog'] = "continue"
         else:
-            res['response']['text'] = "Неверно! Правильный ответ: " + str(sessionStorage[user_id]['question'][1]) + ". Хочешь сыграть еще?"
+            sessionStorage[user_id]['reiting'] = [sessionStorage[user_id]['reiting'][0],
+                                                  sessionStorage[user_id]['reiting'][1] + 1]
+            res['response']['text'] = "Неверно! Правильный ответ: " + str(
+                sessionStorage[user_id]['question'][1]) + ". Твой рейтинг: " + str(sessionStorage[user_id]['reiting'][
+                                                                                       0]) + " из " + str(
+                sessionStorage[user_id]['reiting'][1]) + ". Хочешь сыграть еще?"
             sessionStorage[user_id]['dialog'] = "continue"
 
 
@@ -110,11 +118,12 @@ def get_first_name(req):
             # Во всех остальных случаях возвращаем None.
             return entity['value'].get('first_name', None)
 
+
 def get_number(req):
     for token in req['request']['nlu']['tokens']:
 
         if token.isdigit():
-           return token
+            return token
     return None
 
 

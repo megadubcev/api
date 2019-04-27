@@ -7,8 +7,7 @@ app = Flask(__name__)
 
 logging.basicConfig(level=logging.INFO)
 
-
-# создаём словарь, где для каждого пользователя мы будем хранить его имя
+# создаём словарь, где для каждого пользователя мы будем хранить его имя и остальное
 sessionStorage = {}
 
 
@@ -35,8 +34,12 @@ def handle_dialog(res, req):
         res['response']['text'] = 'Привет! Назови свое имя!'
         # созда\м словарь в который в будущем положим имя пользователя
         sessionStorage[user_id] = {
-            'first_name': None
+            'first_name': None,
+            'reiting': None,
+            'number': None,
+            'dialog': "continue"
         }
+
         return
 
     # если пользователь не новый, то попадаем сюда.
@@ -50,48 +53,33 @@ def handle_dialog(res, req):
             res['response']['text'] = \
                 'Не расслышала имя. Повтори, пожалуйста!'
         # если нашли, то приветствуем пользователя.
-        # И спрашиваем какой город он хочет увидеть.
+
         else:
             sessionStorage[user_id]['first_name'] = first_name
             res['response'][
                 'text'] = 'Приятно познакомиться, ' + first_name.title() \
-                          + '. Я - Алиса. Какой город хочешь увидеть?'
+                          + '. Я - Алиса. Хочешь позаниматься математикой?'
             # получаем варианты buttons из ключей нашего словаря cities
             res['response']['buttons'] = [
                 {
-                    'title': city.title(),
+                    'title': "Да",
                     'hide': True
-                } for city in cities
+                },
+
+                {
+                    'title': "Нет",
+                    'hide': True
+                }
             ]
     # если мы знакомы с пользователем и он нам что-то написал,
-    # то это говорит о том, что он уже говорит о городе, что хочет увидеть.
-    else:
-        # ищем город в сообщение от пользователя
-        city = get_city(req)
-        # если этот город среди известных нам,
-        # то показываем его (выбираем одну из двух картинок случайно)
-        if city in cities:
-            res['response']['card'] = {}
-            res['response']['card']['type'] = 'BigImage'
-            res['response']['card']['title'] = 'Этот город я знаю.'
-            res['response']['card']['image_id'] = random.choice(
-                cities[city])
-            res['response']['text'] = 'Я угадал!'
-        # если не нашел, то отвечает пользователю
-        # 'Первый раз слышу об этом городе.'
+    # и если он отвечает на вопрос хочет ли он играть
+    elif sessionStorage[user_id]['dialog'] is "continue":
+        if "да" in req['request']['nlu']['tokens']:
+            res['response']['text'] = 'понятно'
+        elif "нет" in req['request']['nlu']['tokens']:
+            req['response']['response']['end_session'] = True
         else:
-            res['response']['text'] = \
-                'Первый раз слышу об этом городе. Попробуй еще разок!'
-
-
-def get_city(req):
-    # перебираем именованные сущности
-    for entity in req['request']['nlu']['entities']:
-        # если тип YANDEX.GEO то пытаемся получить город(city),
-        # если нет то возвращаем None
-        if entity['type'] == 'YANDEX.GEO':
-            # возвращаем None, если не нашли сущности с типом YANDEX.GEO
-            return entity['value'].get('city', None)
+            res['response']['text'] = 'Я не поняла ответа. Так да ли нет?'
 
 
 def get_first_name(req):

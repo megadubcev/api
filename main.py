@@ -29,7 +29,7 @@ def main():
 
 
 def handle_dialog(res, req):
-    user_id = req['session']['user_id']
+    session_id = req['session']['session_id']
 
     # если пользователь новый, то просим его представиться.
     if req['session']['new']:
@@ -47,7 +47,7 @@ def handle_dialog(res, req):
     # если пользователь не новый, то попадаем сюда.
     # если поле имени пустое, то это говорит о том,
     # что пользователь ещё не представился.
-    if sessionStorage[user_id]['first_name'] is None:
+    if sessionStorage[session_id]['first_name'] is None:
         # в последнем его сообщение ищем имя.
         first_name = get_first_name(req)
         # если не нашли, то сообщаем пользователю что не расслышали.
@@ -57,7 +57,7 @@ def handle_dialog(res, req):
         # если нашли, то приветствуем пользователя.
 
         else:
-            sessionStorage[user_id]['first_name'] = first_name
+            sessionStorage[session_id]['first_name'] = first_name
             res['response'][
                 'text'] = 'Приятно познакомиться, ' + first_name.title() \
                           + '. Я - Алиса. Хочешь позаниматься математикой?'
@@ -75,11 +75,11 @@ def handle_dialog(res, req):
             ]
     # если мы знакомы с пользователем и он нам что-то написал,
     # и если он отвечает на вопрос хочет ли он играть
-    elif sessionStorage[user_id]['dialog'] is "continue":
+    elif sessionStorage[session_id]['dialog'] is "continue":
         if "да" in req['request']['nlu']['tokens']:
-            sessionStorage[user_id]['dialog'] = "play"
-            sessionStorage[user_id]['question'] = vibor()
-            res['response']['text'] = 'Сколько будет ' + sessionStorage[user_id]['question'][0]
+            sessionStorage[session_id]['dialog'] = "play"
+            sessionStorage[session_id]['question'] = vibor()
+            res['response']['text'] = 'Сколько будет ' + sessionStorage[session_id]['question'][0]
 
         elif "нет" in req['request']['nlu']['tokens']:
             res['response']['text'] = 'пока'
@@ -87,25 +87,25 @@ def handle_dialog(res, req):
         else:
             res['response']['text'] = 'Я не поняла ответа. Так да ли нет?'
 
-    elif sessionStorage[user_id]['dialog'] is "play":
+    elif sessionStorage[session_id]['dialog'] is "play":
         if get_number(req) == None:
             res['response']['text'] = 'Повтори я не расслышала'
 
-        elif int(get_number(req)) == sessionStorage[user_id]['question'][1]:
-            sessionStorage[user_id]['reiting'] = [sessionStorage[user_id]['reiting'][0] + 1,
-                                                  sessionStorage[user_id]['reiting'][1] + 1]
-            res['response']['text'] = "Абсолютно верно! Твой рейтинг: " + str(sessionStorage[user_id]['reiting'][
+        elif int(get_number(req)) == sessionStorage[session_id]['question'][1]:
+            sessionStorage[session_id]['reiting'] = [sessionStorage[session_id]['reiting'][0] + 1,
+                                                  sessionStorage[session_id]['reiting'][1] + 1]
+            res['response']['text'] = "Абсолютно верно! Твой рейтинг: " + str(sessionStorage[session_id]['reiting'][
                                                                                   0]) + " из " + str(
-                sessionStorage[user_id]['reiting'][1]) + ". Хочешь сыграть еще?"
-            sessionStorage[user_id]['dialog'] = "continue"
+                sessionStorage[session_id]['reiting'][1]) + ". Хочешь сыграть еще?"
+            sessionStorage[session_id]['dialog'] = "continue"
         else:
-            sessionStorage[user_id]['reiting'] = [sessionStorage[user_id]['reiting'][0],
-                                                  sessionStorage[user_id]['reiting'][1] + 1]
+            sessionStorage[session_id]['reiting'] = [sessionStorage[session_id]['reiting'][0],
+                                                  sessionStorage[session_id]['reiting'][1] + 1]
             res['response']['text'] = "Неверно! Правильный ответ: " + str(
-                sessionStorage[user_id]['question'][1]) + ". Твой рейтинг: " + str(sessionStorage[user_id]['reiting'][
+                sessionStorage[session_id]['question'][1]) + ". Твой рейтинг: " + str(sessionStorage[session_id]['reiting'][
                                                                                        0]) + " из " + str(
-                sessionStorage[user_id]['reiting'][1]) + ". Хочешь сыграть еще?"
-            sessionStorage[user_id]['dialog'] = "continue"
+                sessionStorage[session_id]['reiting'][1]) + ". Хочешь сыграть еще?"
+            sessionStorage[session_id]['dialog'] = "continue"
 
 
 def get_first_name(req):
